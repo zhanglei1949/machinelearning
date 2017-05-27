@@ -1,16 +1,8 @@
-import numpy as np
-import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras.optimizers import SGD
-from keras import regularizers
-from keras.utils import np_utils
 import csv
 import h5py
-
+from  keras.models import load_model
 import scipy.io as scio
-
+import numpy as np
 def preprocess(filename):
     x_train = []
     y_train = []
@@ -60,56 +52,40 @@ def preprocess(filename):
     print y_test.shape
 
     return x_train, y_train, x_test, y_test
-def train_and_evaluate(filename, model_name,batch_size = 320,epochs = 6):
-    model = Sequential()
-
-    model.add(Dense(620, activation='sigmoid', input_shape=(310, ),kernel_regularizer=regularizers.l1(0.001)))
-    model.add(Dropout(0.5))
-    #model.add(Dense(32,kernel_regularizer=regularizers.l2(0.001), activity_regularizer=regularizers.l1(0.001)))
-    #model.add(Dropout(0.25))
-    #model.add(Dense(100,activation = 'relu', kernel_regularizer=regularizers.l2(0.01)))
-    #model.add(Dense(48, activation = 'relu', kernel_regularizer=regularizers.l2(0.001), activity_regularizer=regularizers.l1(0.001)))
-    #model.add(Dropout(0.25))
-    #model.add(Dense(930, activation = 'relu'))
-    #model.add(Dropout(0.25))
-
-    model.add(Dense(310,activation = 'relu',kernel_regularizer=regularizers.l2(0.01)))
-    model.add(Dropout(0.5))
-
-    #model.add(Dense(240,activation = 'relu'))
-    #model.add(Dropout(0.25))
-    model.add(Dense(24, activation = 'sigmoid',kernel_regularizer=regularizers.l2(0.001)))
-    model.add(Dropout(0.5))
-    model.add(Dense(3, activation='sigmoid'))
-
-    sgd = SGD(lr=0.0001, decay=1e-8, momentum=0.9, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
-    #a batch for a file
-    #use the last one as test set
+def check(filename, model_name):
+    model = load_model(model_name)
     x_train, y_train, x_test, y_test = preprocess(filename)
-    x_train = np.reshape(x_train, (len(x_train), 310))
+    #x_train = np.reshape(x_train, (len(x_train), 310))
     x_test = np.reshape(x_test, (len(x_test), 310))
-    y_train = np_utils.to_categorical(y_train,3)
-    y_test = np_utils.to_categorical(y_test, 3)
-    model.fit(x_train, y_train, epochs = epochs, batch_size = batch_size, shuffle = True, validation_split = 0.2)
-    loss = model.evaluate(x_test, y_test, batch_size = 32)
-    print loss
-    #classes = model.predict(x_test,batch_size =32)
+    #y_train = np_utils.to_categorical(y_train,3)
+    #y_test = np_utils.to_categorical(y_test, 3)
+    #model.fit(x_train, y_train, epochs = epochs, batch_size = batch_size, shuffle = True, validation_split = 0.2)
+    #loss = model.evaluate(x_test, y_test, batch_size = 32)
+    #print loss
     classes = model.predict_classes(x_test,batch_size =32)
     res = [0,0,0]
+    print classes[:100]
     for i in range(len(classes)):
         if(classes[i]==0):
             res[1]+=1
         elif (classes[i]==1):
             res[2]+=1
-        elif (classes[i]==-1):
+        else:
             res[0]+=1
     print res
-    model.save(model_name)
+    res = [0,0,0]
+    for i in range(len(y_test)):
+        if(y_test[i]==0):
+            res[1]+=1
+        elif (y_test[i]==1):
+            res[2]+=1
+        elif (y_test[i]==-1):
+            res[0]+=1
+    print res
+    #model.save(model_name)
 
 def main():
     filename = '../EEG.mat'
-    train_and_evaluate(filename =filename, model_name = 'dense_5_26_1.h5', epochs = 25,batch_size =840 )
-    #batch_size 840
+    check(filename =filename, model_name = 'dense_5_26_69.h5')
+
 main()
-# Generate dummy data

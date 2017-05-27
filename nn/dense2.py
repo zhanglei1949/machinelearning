@@ -63,8 +63,8 @@ def preprocess(filename):
 def train_and_evaluate(filename, model_name,batch_size = 320,epochs = 6):
     model = Sequential()
 
-    model.add(Dense(620, activation='sigmoid', input_shape=(310, ),kernel_regularizer=regularizers.l1(0.001)))
-    model.add(Dropout(0.5))
+    model.add(Dense(620, activation='relu', input_shape=(310, ),kernel_regularizer=regularizers.l2(0.01)))
+    model.add(Dropout(0.2))
     #model.add(Dense(32,kernel_regularizer=regularizers.l2(0.001), activity_regularizer=regularizers.l1(0.001)))
     #model.add(Dropout(0.25))
     #model.add(Dense(100,activation = 'relu', kernel_regularizer=regularizers.l2(0.01)))
@@ -73,16 +73,16 @@ def train_and_evaluate(filename, model_name,batch_size = 320,epochs = 6):
     #model.add(Dense(930, activation = 'relu'))
     #model.add(Dropout(0.25))
 
-    model.add(Dense(310,activation = 'relu',kernel_regularizer=regularizers.l2(0.01)))
-    model.add(Dropout(0.5))
+    model.add(Dense(310,activation = 'relu'))
+    model.add(Dropout(0.2))
 
     #model.add(Dense(240,activation = 'relu'))
     #model.add(Dropout(0.25))
-    model.add(Dense(24, activation = 'sigmoid',kernel_regularizer=regularizers.l2(0.001)))
-    model.add(Dropout(0.5))
+    model.add(Dense(48, activation = 'relu',kernel_regularizer=regularizers.l2(0.01)))
+    model.add(Dropout(0.2))
     model.add(Dense(3, activation='sigmoid'))
 
-    sgd = SGD(lr=0.0001, decay=1e-8, momentum=0.9, nesterov=True)
+    sgd = SGD(lr=0.001, decay=1e-8, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
     #a batch for a file
     #use the last one as test set
@@ -91,7 +91,7 @@ def train_and_evaluate(filename, model_name,batch_size = 320,epochs = 6):
     x_test = np.reshape(x_test, (len(x_test), 310))
     y_train = np_utils.to_categorical(y_train,3)
     y_test = np_utils.to_categorical(y_test, 3)
-    model.fit(x_train, y_train, epochs = epochs, batch_size = batch_size, shuffle = True, validation_split = 0.2)
+    model.fit(x_train, y_train, epochs = epochs, batch_size = batch_size, shuffle = True, validation_split = 0.25)
     loss = model.evaluate(x_test, y_test, batch_size = 32)
     print loss
     #classes = model.predict(x_test,batch_size =32)
@@ -102,14 +102,14 @@ def train_and_evaluate(filename, model_name,batch_size = 320,epochs = 6):
             res[1]+=1
         elif (classes[i]==1):
             res[2]+=1
-        elif (classes[i]==-1):
+        elif (classes[i]==2):
             res[0]+=1
     print res
     model.save(model_name)
 
 def main():
     filename = '../EEG.mat'
-    train_and_evaluate(filename =filename, model_name = 'dense_5_26_1.h5', epochs = 25,batch_size =840 )
-    #batch_size 840
+    train_and_evaluate(filename =filename, model_name = 'dense_5_26_1.h5', epochs = 40,batch_size =1040 )
+
 main()
 # Generate dummy data
