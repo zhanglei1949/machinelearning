@@ -27,7 +27,7 @@ def new_center(label,data):#renew the center for new group of samples
     return center1/cnt1,center2/cnt2,center3/cnt3
 
 def k_mean(data,y,iteration):
-    data = np.array(data)
+    data = np.array(data,float)#data should be arrange in samples*features(n*310)
     label=y
     center1,center2,center3=new_center(y,data)
 
@@ -48,4 +48,24 @@ def k_mean(data,y,iteration):
         center1, center2, center3 = new_center(label, data)
         if center2==tmp2 and center1==tmp1 and center3==tmp3:
             break
-    return label
+    return label,center1,center2,center3
+
+def test(center1,center2,center3,x_test,y_test):
+    x_test = np.array(x_test, float)#data should be arrange in samples*features(n*310)
+    label=y_test-y_test
+
+    for i in range(len(x_test)):
+        L1 = distance(x_test[i], center1)
+        L2 = distance(x_test[i], center2)
+        L3 = distance(x_test[i], center3)
+        if L1 < L2 and L1 < L3:
+            label[i] = 0
+        if L2 < L1 and L2 < L3:
+            label[i] = 1
+        if L3 < L1 and L3 < L2:
+            label[i] = 2
+    cnt=0
+    for i in range (len(x_test)):
+        if (label[i]==y_test[i]):
+            cnt+=1
+    return float(cnt/len(x_test))
